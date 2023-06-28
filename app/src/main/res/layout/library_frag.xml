@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:fontFamily="@font/merienda_extrabold"
+            android:fontFamily="@font/mulish_bold"
             android:text="@string/library_text"
             android:textColor="@color/white"
             android:textSize="22sp" />

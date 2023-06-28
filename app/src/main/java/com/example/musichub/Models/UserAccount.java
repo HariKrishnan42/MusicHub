@@ -7,12 +7,12 @@ import androidx.room.PrimaryKey;
 public class UserAccount {
     @PrimaryKey(autoGenerate = true)
     private int id;
-    private int deviceId;
+    private String deviceId;
     private String path;
 
     private String playlistName;
 
-    public UserAccount(int id, int deviceId, String path, String playlistName) {
+    public UserAccount(int id, String deviceId, String path, String playlistName) {
         this.id = id;
         this.deviceId = deviceId;
         this.path = path;
@@ -27,11 +27,11 @@ public class UserAccount {
         this.id = id;
     }
 
-    public int getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(int deviceId) {
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 

@@ -1,5 +1,6 @@
 package com.example.musichub.Activities;
 
+import android.content.Intent;
 import android.media.Image;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -98,10 +99,8 @@ public class Media_Play extends AppCompatActivity {
         });
 
         dropDownButton.setOnClickListener(view -> {
-            if (player.isPlaying()) {
-                player.stop();
-                finish();
-            }
+            Intent returnIntent = new Intent();
+            setResult(RESULT_OK, returnIntent);
             finish();
         });
     }
@@ -109,10 +108,8 @@ public class Media_Play extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if (player.isPlaying()) {
-            player.stop();
-            finish();
-        }
+        Intent returnIntent = new Intent();
+        setResult(RESULT_OK, returnIntent);
         finish();
     }
 

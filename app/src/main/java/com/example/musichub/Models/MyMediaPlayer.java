@@ -13,4 +13,6 @@ public class MyMediaPlayer {
     }
 
     public static int currentSong = -1;
+
+    public static String DEVICE_ID = "String";
 }

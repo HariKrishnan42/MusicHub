@@ -5,53 +5,41 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.musichub.Activities.Media_Play;
+import com.example.musichub.Fragments.HomeFrag;
 import com.example.musichub.Models.MusicDetail;
 import com.example.musichub.Models.MyMediaPlayer;
 import com.example.musichub.R;
 
-import org.w3c.dom.Text;
-
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.ViewHolder> {
     private Context context;
     private ArrayList<MusicDetail> musicDetails;
 
+    private HomeFrag homeFrag;
+
     private MusicDetail detail;
 
-    public MusicListAdapter(Context context, ArrayList<MusicDetail> musicDetail) {
-        this.context = context;
+    public MusicListAdapter(HomeFrag homeFrag, ArrayList<MusicDetail> musicDetail) {
+        this.homeFrag = homeFrag;
         this.musicDetails = musicDetail;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.music_list_layout, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.music_list_layout, parent, false);
         return new ViewHolder(view);
     }
 
@@ -85,10 +73,9 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         holder.layout.setOnClickListener(view -> {
             MyMediaPlayer.players().reset();
             MyMediaPlayer.currentSong = position;
-            Intent intent = new Intent(context, Media_Play.class);
+            Intent intent = new Intent(homeFrag.getContext(), Media_Play.class);
             intent.putExtra("bundle", musicDetails);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            homeFrag.startActivityForResult(intent, 200);
         });
     }
 
