@@ -25,7 +25,6 @@ import java.util.ArrayList;
 
 
 public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.ViewHolder> {
-    private Context context;
     private ArrayList<MusicDetail> musicDetails;
 
     private HomeFrag homeFrag;
