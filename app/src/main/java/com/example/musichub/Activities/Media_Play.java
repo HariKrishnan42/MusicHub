@@ -1,10 +1,14 @@
 package com.example.musichub.Activities;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,9 +18,12 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.musichub.Models.MusicDetail;
 import com.example.musichub.Models.MyMediaPlayer;
+import com.example.musichub.Models.PlayerController;
 import com.example.musichub.R;
+import com.example.musichub.Services.MyService;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -26,9 +33,9 @@ public class Media_Play extends AppCompatActivity {
     private SeekBar musicBar;
     private TextView startTime, endTime, songName;
 
-    private ArrayList<MusicDetail> musicDetailArrayList = new ArrayList<>();
+    private final ArrayList<MusicDetail> musicDetailArrayList = new ArrayList<>();
 
-    private int position = MyMediaPlayer.currentSong;
+    private final int position = MyMediaPlayer.currentSong;
 
     private ImageView playButton, pauseButton, previousButton, nextButton, dropDownButton;
 
@@ -37,6 +44,8 @@ public class Media_Play extends AppCompatActivity {
     private float x1, x2, y1, y2, d1, d2;
 
     private RelativeLayout swipeLayout;
+
+    private ImageView songImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,22 +56,23 @@ public class Media_Play extends AppCompatActivity {
         endTime = findViewById(R.id.endTime);
         songName = findViewById(R.id.currentSongName);
         pauseButton = findViewById(R.id.pau_btn);
-        previousButton =  findViewById(R.id.prev_btn);
-        nextButton =  findViewById(R.id.next_btn);
+        previousButton = findViewById(R.id.prev_btn);
+        nextButton = findViewById(R.id.next_btn);
         playButton = findViewById(R.id.play_btn);
-        dropDownButton =  findViewById(R.id.dropDownButton);
+        dropDownButton = findViewById(R.id.dropDownButton);
         swipeLayout = findViewById(R.id.swipe_layout1);
-        intentValue();
+        songImage = findViewById(R.id.songImage);
+        player.setOnCompletionListener(mediaPlayer -> nextSong());
         clickListener();
+        intentValue();
         Handler handler = new Handler();
         Media_Play.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                musicBar.setProgress(player.getCurrentPosition());
-                startTime.setText(timeConvert(player.getCurrentPosition()));
+                musicBar.setProgress(PlayerController.player.getCurrentPosition());
+                startTime.setText(timeConvert(PlayerController.player.getCurrentPosition()));
                 handler.postDelayed(this, 50);
             }
-
         });
         musicBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -124,10 +134,8 @@ public class Media_Play extends AppCompatActivity {
                     d2 = y2 - y1;
                     if (Math.abs(d1) > Math.abs(d2)) {
                         if (d1 > 0) {
-                            //Toast.makeText(Media_Play.this, "Left", Toast.LENGTH_SHORT).show();
                             previousSong();
                         } else {
-                            //Toast.makeText(Media_Play.this, "Right", Toast.LENGTH_SHORT).show();
                             nextSong();
                         }
                     }
@@ -147,57 +155,70 @@ public class Media_Play extends AppCompatActivity {
     }
 
     private void intentValue() {
-        musicDetailArrayList = (ArrayList<MusicDetail>) getIntent().getSerializableExtra("bundle");
-        playMusic();
-        player.setOnCompletionListener(mediaPlayer -> nextSong());
+        boolean value = getIntent().getBooleanExtra("boolean", false);
+        Log.d(TAG, "intentValue: " + value);
+        if (!value) {
+            playMusic();
+        } else {
+            prePlay();
+        }
+    }
+
+    private void prePlay() {
+        int duration = Integer.parseInt(PlayerController.details.get(PlayerController.position).getDuration());
+        endTime.setText(timeConvert(duration));
+        songName.setText(PlayerController.details.get(PlayerController.position).getName());
+        musicBar.setMax(Integer.parseInt(PlayerController.details.get(PlayerController.position).getDuration()));
+        musicBar.setProgress(PlayerController.player.getCurrentPosition());
+        if (PlayerController.player.isPlaying()) {
+            pauseButton.setVisibility(View.VISIBLE);
+            playButton.setVisibility(View.GONE);
+        }
     }
 
     private void playMusic() {
-        player.reset();
+        Intent intent = new Intent(this, MyService.class);
+        startService(intent);
         playButton.setVisibility(View.GONE);
         pauseButton.setVisibility(View.VISIBLE);
-        songName.setText(musicDetailArrayList.get(position).getName());
-        int duration = Integer.parseInt(musicDetailArrayList.get(position).getDuration());
+        songName.setText(PlayerController.details.get(PlayerController.position).getName());
+        int duration = Integer.parseInt(PlayerController.details.get(PlayerController.position).getDuration());
         endTime.setText(timeConvert(duration));
-        try {
-            player.setDataSource(musicDetailArrayList.get(position).getPath());
-            player.prepare();
-        } catch (Exception e) {
-            e.printStackTrace();
+        byte[] image = getSongImage(PlayerController.details.get(PlayerController.position).getPath());
+        if (image != null) {
+            Glide.with(getApplicationContext()).load(image).into(songImage);
+        } else {
+            Glide.with(getApplicationContext()).load(R.drawable.app_icon).into(songImage);
         }
+        PlayerController.playSong();
         musicBar.setProgress(0);
-        musicBar.setMax(Integer.parseInt(musicDetailArrayList.get(position).getDuration()));
-        player.start();
+        musicBar.setMax(Integer.parseInt(PlayerController.details.get(PlayerController.position).getDuration()));
+    }
+
+    private byte[] getSongImage(String path) {
+        byte[] art = null;
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(path);
+        art = retriever.getEmbeddedPicture();
+        return art;
     }
 
     private void pauseMusic() {
-        if (player.isPlaying()) {
-            player.pause();
-            musicBar.setProgress(player.getCurrentPosition());
-        }
+        PlayerController.pause();
+        musicBar.setProgress(PlayerController.player.getCurrentPosition());
     }
 
     private void resumeMusic() {
-        if (!player.isPlaying()) {
-            player.start();
-        }
+        PlayerController.resume();
     }
 
     private void nextSong() {
-        if (position == musicDetailArrayList.size() - 1) {
-            position = 0;
-            playMusic();
-        }
-        position += 1;
+        PlayerController.nextSong();
         playMusic();
     }
 
     private void previousSong() {
-        if (position == 0) {
-            position = musicDetailArrayList.size();
-            playMusic();
-        }
-        position -= 1;
+        PlayerController.previousSong();
         playMusic();
     }
 
@@ -208,5 +229,12 @@ public class Media_Play extends AppCompatActivity {
                 TimeUnit.MILLISECONDS.toSeconds(duration) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
         );
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent intent = new Intent(this, MyService.class);
+        stopService(intent);
     }
 }

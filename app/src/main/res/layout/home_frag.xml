@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
-    android:padding="10dp">
+    android:background="@color/black">
 
     <TextView
         android:id="@+id/homeHeader"
@@ -12,6 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:fontFamily="@font/mulish_bold"
+        android:padding="10dp"
         android:text="@string/HomeHeader"
         android:textColor="@color/white"
         android:textSize="20sp"
@@ -21,10 +21,9 @@
         android:id="@+id/listMusic"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/minimize_layout"
         android:layout_below="@+id/homeHeader"
         android:layout_marginTop="20dp"
-        android:paddingBottom="5dp"
+        android:paddingHorizontal="10dp"
         tools:ignore="MissingConstraints" />
 
     <RelativeLayout
@@ -32,8 +31,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:visibility="gone"
-        android:background="@drawable/minimize_player_bg">
+        android:background="@drawable/minimize_player_bg"
+        android:visibility="gone">
 
         <RelativeLayout
             android:id="@+id/minimize_navi"

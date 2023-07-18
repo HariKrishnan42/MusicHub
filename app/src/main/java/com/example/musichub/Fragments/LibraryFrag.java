@@ -72,8 +72,8 @@ public class LibraryFrag extends Fragment {
     }
 
     private void createDatabase(String s) {
-        UserAccount userAccount = new UserAccount(0, MyMediaPlayer.DEVICE_ID, "", s);
-        userDao.insert(userAccount);
+//        UserAccount userAccount = new UserAccount(0, MyMediaPlayer.DEVICE_ID, "", s);
+//        userDao.insert(userAccount);
         Toast.makeText(getContext(), "Playlist Created", Toast.LENGTH_SHORT).show();
     }
 }

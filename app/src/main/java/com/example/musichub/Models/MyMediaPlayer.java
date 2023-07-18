@@ -3,7 +3,6 @@ package com.example.musichub.Models;
 import android.media.MediaPlayer;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MyMediaPlayer {
     static MediaPlayer player;

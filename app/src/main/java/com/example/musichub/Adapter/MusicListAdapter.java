@@ -15,10 +15,12 @@ import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.musichub.Activities.Media_Play;
 import com.example.musichub.Fragments.HomeFrag;
 import com.example.musichub.Models.MusicDetail;
 import com.example.musichub.Models.MyMediaPlayer;
+import com.example.musichub.Models.PlayerController;
 import com.example.musichub.R;
 
 import java.util.ArrayList;
@@ -49,31 +51,17 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
             detail = musicDetails.get(position);
             holder.musicName.setText(detail.getName());
             holder.authorName.setText(detail.getArtist());
-            Bitmap image = getSongImage(detail.getPath());
+            byte[] image = getSongImage(detail.getPath());
             if (image != null) {
-//                Glide.with(context)
-//                        .asBitmap()
-//                        .load(image)
-//                        .apply(new RequestOptions().override(500, 500)) // Optional: Set desired image size
-//                        .into(new CustomTarget<Bitmap>() {
-//                            @Override
-//                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-//                                holder.musicIcon.setImageBitmap(resource);
-//                            }
-//
-//                            @Override
-//                            public void onLoadCleared(Drawable placeholder) {
-//
-//                            }
-//                        });
+                Glide.with(homeFrag.getContext()).load(image).into(holder.musicIcon);
+            } else {
+                Glide.with(homeFrag.getContext()).load(R.drawable.app_icon).into(holder.musicIcon);
             }
 
         }
         holder.layout.setOnClickListener(view -> {
-            MyMediaPlayer.players().reset();
-            MyMediaPlayer.currentSong = position;
+            PlayerController.position = position;
             Intent intent = new Intent(homeFrag.getContext(), Media_Play.class);
-            intent.putExtra("bundle", musicDetails);
             homeFrag.startActivityForResult(intent, 200);
         });
     }
@@ -100,15 +88,11 @@ public class MusicListAdapter extends RecyclerView.Adapter<MusicListAdapter.View
         }
     }
 
-    private Bitmap getSongImage(String uri) {
+    private byte[] getSongImage(String uri) {
         byte[] art = null;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(uri);
         art = retriever.getEmbeddedPicture();
-        if (art != null) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
-            return bitmap;
-        }
-        return null;
+        return art;
     }
 }

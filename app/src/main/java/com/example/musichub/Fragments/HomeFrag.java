@@ -22,9 +22,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musichub.Activities.Landing;
 import com.example.musichub.Adapter.MusicListAdapter;
 import com.example.musichub.Models.MusicDetail;
 import com.example.musichub.Models.MyMediaPlayer;
+import com.example.musichub.Models.PlayerController;
 import com.example.musichub.R;
 
 import java.util.ArrayList;
@@ -44,7 +46,6 @@ public class HomeFrag extends Fragment {
     private RelativeLayout minimizeNavi;
 
     private int position = 0;
-    private float x1, x2, y1, y2, d1, d2;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,97 +98,22 @@ public class HomeFrag extends Fragment {
         minimizeLayout = view.findViewById(R.id.minimize_layout);
         minimizeNavi = view.findViewById(R.id.minimize_navi);
         musicList.setLayoutManager(new LinearLayoutManager(getContext()));
-        getAudioList();
-        onClickListener();
+        fetchData();
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private void onClickListener() {
-        playBtn.setOnClickListener(view -> {
-            playBtn.setVisibility(View.GONE);
-            pauseBtn.setVisibility(View.VISIBLE);
-            if (!player.isPlaying()) {
-                player.start();
-            }
-        });
-        pauseBtn.setOnClickListener(view -> {
-            pauseBtn.setVisibility(View.GONE);
-            playBtn.setVisibility(View.VISIBLE);
-            if (player.isPlaying()) {
-                player.pause();
-            }
-        });
-        minimizeNavi.setOnTouchListener((view, motionEvent) -> {
-
-            switch (motionEvent.getAction()) {
-                case (MotionEvent.ACTION_DOWN) -> {
-                    x1 = motionEvent.getX();
-                    y1 = motionEvent.getY();
-                }
-                case (MotionEvent.ACTION_UP) -> {
-                    x2 = motionEvent.getX();
-                    y2 = motionEvent.getY();
-                    d1 = x2 - x1;
-                    d2 = y2 - y1;
-                    if (Math.abs(d1) > Math.abs(d2)) {
-                        if (d1 > 0) {
-                            prevSong();
-                        } else {
-                            nextSong();
-                        }
-                    }
-                }
-            }
-            return false;
-        });
-    }
-    private void prevSong() {
-        if (position == 0) {
-            position = musicDetail.size();
-            playSong();
+    private void fetchData() {
+        musicDetail = PlayerController.details;
+        if (musicDetail.size() != 0) {
+            MusicListAdapter musicListAdapter = new MusicListAdapter(HomeFrag.this, musicDetail);
+            musicList.setAdapter(musicListAdapter);
         }
-        position -= 1;
-        playSong();
-    }
-    private void nextSong() {
-        if (position == musicDetail.size() - 1) {
-            position = 0;
-            playSong();
-        }
-        position += 1;
-        playSong();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 201) {
-            position = MyMediaPlayer.currentSong;
-            minimizeLayout.setVisibility(View.VISIBLE);
-            currentSongName.setText(musicDetail.get(MyMediaPlayer.currentSong).getName());
-            currentArtistName.setText(musicDetail.get(MyMediaPlayer.currentSong).getArtist());
-            if (player.isPlaying()) {
-                playBtn.setVisibility(View.GONE);
-                pauseBtn.setVisibility(View.VISIBLE);
-            } else if (!player.isPlaying()) {
-                playBtn.setVisibility(View.VISIBLE);
-                pauseBtn.setVisibility(View.GONE);
-            }
+        if (requestCode == 200) {
+            ((Landing) getActivity()).openMinimizePlayer();
         }
-    }
-
-    private void playSong() {
-        player.reset();
-        currentArtistName.setText(musicDetail.get(position).getArtist());
-        currentSongName.setText(musicDetail.get(position).getName());
-        playBtn.setVisibility(View.GONE);
-        pauseBtn.setVisibility(View.VISIBLE);
-        try {
-            player.setDataSource(musicDetail.get(position).getPath());
-            player.prepare();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        player.start();
     }
 }
