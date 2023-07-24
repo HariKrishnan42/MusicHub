@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 
+import com.example.musichub.App;
 import com.example.musichub.Interfaces.CheckProgress;
 import com.example.musichub.Interfaces.PlayerIndicator;
 import com.example.musichub.Interfaces.SongPosition;
@@ -11,7 +12,7 @@ import com.example.musichub.Services.MyService;
 
 import java.util.ArrayList;
 
-public class PlayerController {
+public class PlayerController implements PlayerIndicator {
     public static MediaPlayer player = MyMediaPlayer.players();
     public static ArrayList<MusicDetail> details = new ArrayList<>();
     public static int position = -1;
@@ -20,7 +21,7 @@ public class PlayerController {
 
     public static PlayerIndicator playerIndicator;
 
-    public static void playSong() {
+    private void playSong() {
         player.reset();
         try {
             player.setDataSource(details.get(position).getPath());
@@ -31,19 +32,21 @@ public class PlayerController {
         player.start();
     }
 
-    public static void pause() {
+    @Override
+    public void playing() {
+        playSong();
+    }
+
+    @Override
+    public void pauseI() {
         if (player.isPlaying()) {
             player.pause();
         }
     }
 
-    public static void resume() {
-        if (!player.isPlaying()) {
-            player.start();
-        }
-    }
 
-    public static void previousSong() {
+    @Override
+    public void previous() {
         if (position == 0) {
             position = details.size();
             playSong();
@@ -52,12 +55,20 @@ public class PlayerController {
         playSong();
     }
 
-    public static void nextSong() {
+    @Override
+    public void next() {
         if (position == details.size() - 1) {
             position = 0;
             playSong();
         }
         position += 1;
         playSong();
+    }
+
+    @Override
+    public void resumeI() {
+        if (!player.isPlaying()) {
+            player.start();
+        }
     }
 }

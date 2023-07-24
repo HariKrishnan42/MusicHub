@@ -71,7 +71,7 @@ public class Landing extends AppCompatActivity {
 //        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
 //        itemTouchHelper.attachToRecyclerView(swipeLayout);
         if (player.isPlaying()) {
-            player.setOnCompletionListener(mediaPlayer -> PlayerController.nextSong());
+            player.setOnCompletionListener(mediaPlayer -> new PlayerController().next());
         }
         bottomNavSelected();
         makeFragment(homeFrag);
@@ -138,13 +138,13 @@ public class Landing extends AppCompatActivity {
         lpauseBtn.setOnClickListener(view -> {
             lplayBtn.setVisibility(View.VISIBLE);
             lpauseBtn.setVisibility(View.GONE);
-            PlayerController.pause();
+            new PlayerController().pauseI();
         });
 
         lplayBtn.setOnClickListener(view -> {
             lplayBtn.setVisibility(View.GONE);
             lpauseBtn.setVisibility(View.VISIBLE);
-            PlayerController.resume();
+            new PlayerController().resumeI();
         });
         skippedPrevious.setOnClickListener(view -> {
             prevSong();
@@ -193,7 +193,7 @@ public class Landing extends AppCompatActivity {
     }
 
     private void prevSong() {
-        PlayerController.previousSong();
+        new PlayerController().previous();
         songName.setText(PlayerController.details.get(PlayerController.position).getName());
         byte[] image = getSongImage(PlayerController.details.get(PlayerController.position).getPath());
         if (image != null) {
@@ -206,7 +206,7 @@ public class Landing extends AppCompatActivity {
     }
 
     private void nextSong() {
-        PlayerController.nextSong();
+        new PlayerController().next();
         songName.setText(PlayerController.details.get(PlayerController.position).getName());
         byte[] image = getSongImage(PlayerController.details.get(PlayerController.position).getPath());
         if (image != null) {

@@ -190,7 +190,7 @@ public class Media_Play extends AppCompatActivity {
         } else {
             Glide.with(getApplicationContext()).load(R.drawable.app_icon).into(songImage);
         }
-        PlayerController.playSong();
+        new PlayerController().playing();
         musicBar.setProgress(0);
         musicBar.setMax(Integer.parseInt(PlayerController.details.get(PlayerController.position).getDuration()));
     }
@@ -204,21 +204,21 @@ public class Media_Play extends AppCompatActivity {
     }
 
     private void pauseMusic() {
-        PlayerController.pause();
+        new PlayerController().pauseI();
         musicBar.setProgress(PlayerController.player.getCurrentPosition());
     }
 
     private void resumeMusic() {
-        PlayerController.resume();
+        new PlayerController().resumeI();
     }
 
     private void nextSong() {
-        PlayerController.nextSong();
+        new PlayerController().next();
         playMusic();
     }
 
     private void previousSong() {
-        PlayerController.previousSong();
+        new PlayerController().previous();
         playMusic();
     }
 

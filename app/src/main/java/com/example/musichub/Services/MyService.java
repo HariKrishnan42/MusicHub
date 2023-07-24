@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
@@ -41,11 +42,12 @@ public class MyService extends Service implements CheckProgress {
     private static final String ACTION_NEXT = "com.example.musichub.ACTION_NEXT";
     public static RemoteViews remoteViews;
     Notification notification1;
-    private NotificationManager manager;
     public NotificationManagerCompat compat1;
     public NotificationCompat.Builder notification;
     public Context context;
     private ProgressThread progressThread;
+
+    private Handler handler;
 
     public MyService() {
     }
@@ -55,11 +57,12 @@ public class MyService extends Service implements CheckProgress {
         super.onCreate();
         context = MyService.this;
         progressThread = new ProgressThread(this);
+        handler = new Handler();
         progressThread.run();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = new NotificationChannel("MusicPlayerChannel", "MusicPlayer", NotificationManager.IMPORTANCE_LOW);
             notificationChannel.setLightColor(Color.BLUE);
-            manager = this.getSystemService(NotificationManager.class);
+            NotificationManager manager = this.getSystemService(NotificationManager.class);
             manager.createNotificationChannel(notificationChannel);
         }
         notificationNew();
@@ -93,7 +96,7 @@ public class MyService extends Service implements CheckProgress {
                 return;
             }
         } else {
-            notification1 = notification.build();
+            compat1.notify(2, notification.build());
         }
     }
 
@@ -116,20 +119,20 @@ public class MyService extends Service implements CheckProgress {
     }
 
     private void playPreviousSong() {
-        PlayerController.previousSong();
+        new PlayerController().previous();
         notificationNew();
     }
 
     private void playNextSong() {
-        PlayerController.nextSong();
+        new PlayerController().next();
         notificationNew();
     }
 
     private void playOrPauseCurrentSong() {
         if (PlayerController.player.isPlaying()) {
-            PlayerController.pause();
+            new PlayerController().pauseI();
         } else {
-            PlayerController.playSong();
+            new PlayerController().playing();
         }
         notificationNew();
     }
@@ -156,6 +159,16 @@ public class MyService extends Service implements CheckProgress {
 
     @Override
     public void onProgress(int b) {
-        Log.d(TAG, "onProgress: "+b);// start with this
+        //Log.d(TAG, "onProgress: " + b);// start with this
+        //int startTime = Integer.parseInt(timeConvert(b));
+        Log.d(TAG, "onProgress: 2 " + timeConvert(b));
+        //notification.setProgress(Integer.parseInt(PlayerController.details.get(PlayerController.position).getDuration()), Integer.parseInt(timeConvert(PlayerController.player.getCurrentPosition())), true);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        } else {
+//            compat1.notify(2, notification.build());
+        }
     }
 }
